@@ -1,11 +1,14 @@
-//import logo from './logo.svg';
-//import './App.css';
-
 import { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
-import Searchbar from './components/Searchbar';
-import Container from './components/Container';
+import 'react-toastify/dist/ReactToastify.css';
 import apiService from './services';
+import Container from './components/Container';
+import Searchbar from './components/Searchbar';
+import ImageGallery from './components/ImageGallery';
+import Button from './components/Button';
+import Loader from './components/Loader';
+import Modal from './components/Modal';
+import ErrorView from './components/ErrorView';
 
 class App extends Component {
   state = {
@@ -17,6 +20,12 @@ class App extends Component {
     isLoading: false,
     showModal: false,
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.query !== this.state.query) {
+      this.setState({ images: [], page: 1, error: null });
+    }
+  }
 
   searchImages = async () => {
     const { query, page } = this.state;
@@ -45,19 +54,44 @@ class App extends Component {
     }
   };
 
+  handleChange = e => {
+    this.setState({ query: e.target.value });
+  };
+
   handleSubmit = e => {
     e.preventDefault();
     this.searchImages();
   };
 
-  handleChange = e => {
-    this.setState({ query: e.target.value });
+  onLoadMore = () => {
+    this.searchImages();
+    this.scrollPage();
+  };
+
+  onOpenModal = e => {
+    this.setState({ largeImageURL: e.target.dataset.source });
+    this.toggleModal();
   };
 
   toggleLoader = () => {
     this.setState(({ isLoading }) => ({
       isLoading: !isLoading,
     }));
+  };
+
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
+  };
+
+  scrollPage = () => {
+    setTimeout(() => {
+      window.scrollBy({
+        top: document.documentElement.clientHeight - 160,
+        behavior: 'smooth',
+      });
+    }, 1000);
   };
 
   render() {
@@ -77,6 +111,24 @@ class App extends Component {
           value={query}
         />
 
+        {error && <ErrorView texterror={error} />}
+
+        {images.length > 0 && (
+          <ImageGallery images={images} onOpenModal={this.onOpenModal} />
+        )}
+
+        {isLoading && <Loader />}
+
+        {!isLoading && images.length > 0 && (
+          <Button onLoadMore={this.onLoadMore} />
+        )}
+
+        {showModal && (
+          <Modal
+            onToggleModal={this.toggleModal}
+            largeImageURL={largeImageURL}
+          />
+        )}
         <ToastContainer autoClose={3700} />
       </Container>
     );
