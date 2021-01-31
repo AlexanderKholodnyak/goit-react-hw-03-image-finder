@@ -88,7 +88,9 @@ class App extends Component {
   scrollPage = () => {
     setTimeout(() => {
       window.scrollBy({
-        top: document.documentElement.clientHeight - 160,
+        top:
+          document.documentElement.clientHeight -
+          document.documentElement.clientTop,
         behavior: 'smooth',
       });
     }, 1000);
