@@ -1,138 +1,80 @@
 import { Component } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import apiService from './services';
-import Container from './components/Container';
+// import { ToastContainer} from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
+// import apiService from './services';
+// import Container from './components/Container';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
-import Button from './components/Button';
-import Loader from './components/Loader';
-import Modal from './components/Modal';
-import ErrorView from './components/ErrorView';
+// import ImageGalleryItem from './components/ImageGalleryItem';
+// import Button from './components/Button';
+// import Loader from './components/Loader';
+// import Modal from './components/Modal';
+// import ErrorView from './components/ErrorView';
 
 class App extends Component {
   state = {
     query: '',
-    images: [],
-    largeImageURL: '',
-    page: 1,
-    error: null,
-    isLoading: false,
-    showModal: false,
+    // images: [],
+    // largeImageURL: '',
+    // page: 1,
+    // error: null,
+    // isLoading: false,
+    // showModal: false,
+    // status: 'idle',
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.query !== this.state.query) {
-      this.setState({ images: [], page: 1, error: null });
-    }
+  componentDidMount() {
+    // this.searchImages();
   }
+  // componentDidUpdate(prevProps, prevState) {
+  //   if (this.state.query !== prevState.query) {
+  //    this.searchImages(this.state.query, this.state.page);
+  //   }
+  // }
+  // searchImages =  () => {
+  //   const { query, page } = this.state;
+  //   this.setState({ isLoading: true });
 
-  searchImages = async () => {
-    const { query, page } = this.state;
+  //   fetch(`https://pixabay.com/api/?q=${query}&page=${page}&key=18452046-d075d28130c097165687e8e16&image_type=photo&orientation=horizontal&per_page=12`)
+  //     // .then(res => res.json())
+  //     .then(response => {
+  //       if (response.ok) {
+  //         return response.json();
+  //       }
+  //       return Promise.reject(new Error('Invalid request'));
+  //     })
 
-    if (query.trim() === '') {
-      return toast.error(
-        'No-no! Dont joke with me! Enter something interesting!',
-      );
-    }
+  //     .then(images => this.setState({ images: images.hits }))
+  //     .catch(error=>this.setState({error}))
+  //     .finally(() => this.setState({ isLoading: false }));
+  // };
 
-    this.toggleLoader();
+  //  handleChange = e => {
+  //   this.setState({ query: e.target.value });
+  // };
 
-    try {
-      const request = await apiService(query, page);
-      this.setState(({ images, page }) => ({
-        images: [...images, ...request],
-        page: page + 1,
-      }));
-      if (request.length === 0) {
-        this.setState({ error: `No results were found for ${query}!` });
-      }
-    } catch (error) {
-      this.setState({ error: 'Something went wrong. Try again.' });
-    } finally {
-      this.toggleLoader();
-    }
-  };
-
-  handleChange = e => {
-    this.setState({ query: e.target.value });
-  };
-
-  handleSubmit = e => {
-    e.preventDefault();
-    this.searchImages();
-  };
-
-  onLoadMore = () => {
-    this.searchImages();
-    this.scrollPage();
-  };
-
-  onOpenModal = e => {
-    this.setState({ largeImageURL: e.target.dataset.source });
-    this.toggleModal();
-  };
-
-  toggleLoader = () => {
-    this.setState(({ isLoading }) => ({
-      isLoading: !isLoading,
-    }));
-  };
-
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-  };
-
-  scrollPage = () => {
-    setTimeout(() => {
-      window.scrollBy({
-        top:
-          document.documentElement.clientHeight -
-          document.documentElement.clientTop,
-        behavior: 'smooth',
-      });
-    }, 1000);
+  handleSubmit = name => {
+    this.setState({ query: name });
+    // this.searchImages(this.state.query, this.state.page);
+    console.log(name);
   };
 
   render() {
     const {
       query,
-      images,
-      largeImageURL,
-      isLoading,
-      showModal,
-      error,
+      // images,
+      // largeImageURL,
+      // isLoading,
+      // showModal,
+      // error,
+      // status,
     } = this.state;
     return (
-      <Container>
-        <Searchbar
-          onHandleSubmit={this.handleSubmit}
-          onSearchQueryChange={this.handleChange}
-          value={query}
-        />
+      <div>
+        <Searchbar onHandleSubmit={this.handleSubmit} />
 
-        {error && <ErrorView texterror={error} />}
-
-        {images.length > 0 && (
-          <ImageGallery images={images} onOpenModal={this.onOpenModal} />
-        )}
-
-        {isLoading && <Loader />}
-
-        {!isLoading && images.length > 0 && (
-          <Button onLoadMore={this.onLoadMore} />
-        )}
-
-        {showModal && (
-          <Modal
-            onToggleModal={this.toggleModal}
-            largeImageURL={largeImageURL}
-          />
-        )}
-        <ToastContainer autoClose={3700} />
-      </Container>
+        <ImageGallery query={query} />
+      </div>
     );
   }
 }
