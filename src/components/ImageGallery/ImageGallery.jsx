@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { ToastContainer } from 'react-toastify';
 import PropTypes from 'prop-types';
-
+import apiService from '../services/apiService';
 import ImageGalleryItem from '../ImageGalleryItem';
 import s from './ImageGallery.module.css';
 import Loader from '../Loader';
@@ -17,7 +17,6 @@ class ImageGallery extends Component {
     error: null,
     isLoading: false,
     showModal: false,
-    // status: 'idle',
   };
   static propTypes = {
     query: PropTypes.string.isRequired,
@@ -28,14 +27,13 @@ class ImageGallery extends Component {
     const nextQuery = this.props.query;
     const prevPage = prevState.page;
     const nextPage = this.state.page;
-    // const { page } = this.state;
+
     if (prevQuery !== nextQuery) {
       this.setState({ images: [], page: 1, error: null });
     }
 
     if (prevQuery !== nextQuery || prevPage !== nextPage) {
-      // this.setState({ page: 1 });
-
+      this.setState({ isLoading: true });
       this.searchImages();
     }
   }
@@ -43,19 +41,21 @@ class ImageGallery extends Component {
   searchImages = () => {
     this.setState({ isLoading: true });
     const nextQuery = this.props.query;
-    const { page } = this.state;
-    fetch(
-      `https://pixabay.com/api/?q=${nextQuery}&page=${page}&key=18452046-d075d28130c097165687e8e16&image_type=photo&orientation=horizontal&per_page=12`,
-    )
-      // .then(res => res.json())
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        }
-        return Promise.reject(new Error('Invalid request'));
-      })
+    const page = this.state.page;
 
-      // .then(images => this.setState({ images: images.hits }))
+    apiService
+      .fetchImages(nextQuery, page)
+      // fetch(
+      //   `https://pixabay.com/api/?q=${nextQuery}&page=${page}&key=18452046-d075d28130c097165687e8e16&image_type=photo&orientation=horizontal&per_page=12`,
+      // )
+
+      // .then(response => {
+      //   if (response.ok) {
+      //     return response.json();
+      //   }
+      //   return Promise.reject(new Error('Invalid request'));
+      // })
+
       .then(newImages => {
         if (newImages.total !== 0) {
           this.setState(prevState => ({
@@ -123,10 +123,6 @@ class ImageGallery extends Component {
             largeImageURL={largeImageURL}
           />
         )}
-        {/* <Modal
-            onToggleModal={this.toggleModal}
-            largeImageURL={largeImageURL}
-          /> */}
         {<ToastContainer autoClose={3000} />}
       </div>
     );
